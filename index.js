@@ -26,7 +26,7 @@ async function run() {
     });
 
     const prompt =
-      "Randomly select one cryptocurrency project from Union Build, HumanityProtocool, or Caldera. Write a creative Twitter post about its unique features and impact. The post must be 200–280 characters and must not exceed 280 characters under any circumstances.";
+      "Randomly select one cryptocurrency project from Union Build, HumanityProtocool, 0G labs, MagicNewton or Caldera. Write a creative Twitter post about its unique features and impact in web3 . The post must be 200–280 characters and must not exceed 280 characters under any circumstances.";
 
     const tokenCount = await model.countTokens(prompt);
     console.log("Prompt token count:", tokenCount.totalTokens);
