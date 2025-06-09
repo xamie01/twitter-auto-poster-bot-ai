@@ -12,30 +12,37 @@ const twitterClient = new TwitterApi({
 });
 
 const generationConfig = {
-  maxOutputTokens: 280, // Twitter's max character limit
-  temperature: 1.5, // Higher for creative output
+  maxOutputTokens: 70, // Approx. 280 characters (1 token ≈ 4 chars)
+  temperature: 1.5, // Keep for creativity
 };
 
 const genAI = new GoogleGenerativeAI(SECRETS.GEMINI_API_KEY);
 
 async function run() {
   try {
-    // Use a stable, supported model
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash-002",
       generationConfig,
     });
 
-    // Refined prompt for 200–280 characters
     const prompt =
-      "Randomly select one cryptocurrency project from Union Build, LayerEdge, or Caldera. Research it and generate a creative Twitter post about it, between 200 and 280 characters, highlighting its unique features and potential impact. If the response exceeds 280 characters, split it into a thread.";
+      "Randomly select one cryptocurrency project from Union Build, HumanityProtocool, or Caldera. Write a creative Twitter post about its unique features and impact. The post must be 200–280 characters and must not exceed 280 characters under any circumstances.";
+
+    const tokenCount = await model.countTokens(prompt);
+    console.log("Prompt token count:", tokenCount.totalTokens);
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
+    let text = response.text();
+
+    // Truncate to 280 characters if necessary
+    if (text.length > 280) {
+      text = text.substring(0, 280);
+      console.log("Text truncated to 280 characters.");
+    }
+
     console.log("Generated text:", text, `\nLength: ${text.length} characters`);
 
-    // Verify character length before tweeting
     if (text.length >= 200 && text.length <= 280) {
       await sendTweet(text);
     } else {
@@ -43,6 +50,11 @@ async function run() {
     }
   } catch (error) {
     console.error("Error generating content:", error);
+    if (error.status === 429) {
+      console.log("Rate limit exceeded. Retrying after 31 seconds...");
+      await new Promise(resolve => setTimeout(resolve, 31000));
+      await run();
+    }
   }
 }
 
