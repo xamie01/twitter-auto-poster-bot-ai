@@ -1,6 +1,6 @@
 // By VishwaGauravIn (https://itsvg.in)
 
-const GenAI = require("@google/generative-ai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { TwitterApi } = require("twitter-api-v2");
 const SECRETS = require("./SECRETS");
 
@@ -12,29 +12,39 @@ const twitterClient = new TwitterApi({
 });
 
 const generationConfig = {
-  maxOutputTokens: 400,
+  maxOutputTokens: 280, // Twitter's max character limit
+  temperature: 1.5, // Higher for creative output
 };
-const genAI = new GenAI.GoogleGenerativeAI(SECRETS.GEMINI_API_KEY);
+
+const genAI = new GoogleGenerativeAI(SECRETS.GEMINI_API_KEY);
 
 async function run() {
-  // For text-only input, use the gemini-pro model
-  const model = genAI.getGenerativeModel({
-    model: "gemini-pro",
-    generationConfig,
-  });
+  try {
+    // Use a stable, supported model
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash-002",
+      generationConfig,
+    });
 
-  // Write your prompt here
-  const prompt =
-    " Research this  set of cryptocurrency projects Union Build, LayerEdge, and Caldera randomly select one, and generate a Twitter post under 280 characters but at least 200 characters.";
+    // Refined prompt for 200–280 characters
+    const prompt =
+      "Randomly select one cryptocurrency project from Union Build, LayerEdge, or Caldera. Research it and generate a creative Twitter post about it, between 200 and 280 characters, highlighting its unique features and potential impact. If the response exceeds 280 characters, split it into a thread.";
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
-  console.log(text);
-  sendTweet(text);
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    console.log("Generated text:", text, `\nLength: ${text.length} characters`);
+
+    // Verify character length before tweeting
+    if (text.length >= 200 && text.length <= 280) {
+      await sendTweet(text);
+    } else {
+      console.error(`Text length (${text.length}) is outside 200–280 characters.`);
+    }
+  } catch (error) {
+    console.error("Error generating content:", error);
+  }
 }
-
-run();
 
 async function sendTweet(tweetText) {
   try {
@@ -44,3 +54,5 @@ async function sendTweet(tweetText) {
     console.error("Error sending tweet:", error);
   }
 }
+
+run();
