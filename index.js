@@ -153,7 +153,4 @@ run();
 
 
 
-//git add UnionBuild HumanityProtocool 0Glabs MagicNewton Caldera
-git add index.js package.json .github/workflows/twitter-bot.yml SECRETS.js
-git commit -m "Switch to folder-based images, remove AI image generation"
-git push origin main //
+
