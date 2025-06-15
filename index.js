@@ -96,7 +96,7 @@ async function run() {
       model: "gemini-1.5-flash-002",
       generationConfig: {
         maxOutputTokens: isThread ? 500 : 100,
-        temperature: 1.5,
+        temperature: 2.0,
       },
     });
 
