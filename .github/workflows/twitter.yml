@@ -13,7 +13,7 @@ jobs:
           node-version: "18.19.1"
           cache: "npm"
       - run: npm install
-       run: |
+      - run: |
           if [ -z "$APP_KEY" ] || [ -z "$APP_SECRET" ] || [ -z "$ACCESS_TOKEN" ] || [ -z "$ACCESS_SECRET" ]; then
             echo "One or more required secrets are missing. Please check your repository secrets." >&2
             exit 1
